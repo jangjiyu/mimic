@@ -3,10 +3,10 @@ const errorCodes = require("../errors/errorCodes");
 
 module.exports = {
   errorHandler: (err, req, res, next) => {
+    logger.error(err.message);
+
     const codeName = (err && err.codeName) || null;
     let error = errorCodes[codeName] || errorCodes["INTERNAL_SERVER_ERROR"];
-
-    logger.error(error.name + " - " + error.message);
 
     //* joi 라이브러리 사용한 validation 검사 에러
     if (err.name === "ValidationError") error = errorCodes["BAD_REQUEST"];

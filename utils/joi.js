@@ -4,7 +4,24 @@ const numberRegex = /^[0-9]+$/;
 const emailRegex = /^\w+([\.-]?\w+)@\w+([\.-]?\w+)(\.\w{2,4})+$/;
 const passwordRegex = /^(?!((?:[A-Za-z]+)|(?:[~!@#$%^&()_+=]+)|(?=[0-9]+))$)[A-Za-z\d~!@#$%^&()_+=]{8,20}$/;
 const dateRegex = /^\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$/;
-const mbtiInfo = [ "INFP", "ENFP", "INFJ", "ENFJ", "INTJ", "ENTJ", "INTP", "ENTP", "ISFP", "ESFP", "ISTP", "ESTP", "ISFJ", "ESFJ", "ISTJ", "ESTJ" ];
+const mbtiInfo = [
+  "INFP",
+  "ENFP",
+  "INFJ",
+  "ENFJ",
+  "INTJ",
+  "ENTJ",
+  "INTP",
+  "ENTP",
+  "ISFP",
+  "ESFP",
+  "ISTP",
+  "ESTP",
+  "ISFJ",
+  "ESFJ",
+  "ISTJ",
+  "ESTJ",
+];
 
 class Joi {
   // parameter primaryKey 유효성 검사
@@ -41,9 +58,8 @@ class Joi {
     confirmPassword: joi.string().pattern(passwordRegex),
     nickname: joi.string().min(1).max(12).trim(),
     mbti: joi.string().custom((mbti, helper) => {
-      if (!mbtiInfo.includes(mbti)) {
-        return helper.message("please select the MBTI");
-      }
+      if (!mbtiInfo.includes(mbti)) return helper.message("please select the MBTI");
+
       return mbti;
     }),
   });
@@ -64,9 +80,8 @@ class Joi {
   // mbti 등록 유효성 검사
   mbtiSchema = joi.object({
     mbti: joi.string().custom((mbti, helper) => {
-      if (!mbtiInfo.includes(mbti)) {
-        return helper.message("please select the MBTI");
-      }
+      if (!mbtiInfo.includes(mbti)) return helper.message("please select the MBTI");
+
       return mbti;
     }),
   });
@@ -92,9 +107,8 @@ class Joi {
     mbti: joi
       .string()
       .custom((mbti, helper) => {
-        if (!mbtiInfo.includes(mbti)) {
-          return helper.message("please select the MBTI");
-        }
+        if (!mbtiInfo.includes(mbti)) return helper.message("please select the MBTI");
+
         return mbti;
       })
       .allow(null, ""),

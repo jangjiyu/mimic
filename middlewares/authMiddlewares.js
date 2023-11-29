@@ -9,9 +9,7 @@ module.exports = (req, res, next) => {
     const [authType, authToken] = (authorization || "").split(" ");
 
     // 전달받은 인증값이 Bearer로 시작하지 않으면 인증 실패
-    if (authType !== "Bearer") {
-      throw new CustomError("UNAUTHORIZED");
-    }
+    if (authType !== "Bearer") throw new CustomError("UNAUTHORIZED");
 
     // 뒤쪽 'authToken'을 우리 MYSECRET_KEY를 가지고 인증해보고 에러 없으면, user 정보를 토근으로 다음 next으로 넘겨줌
     jwt.verify(
@@ -21,9 +19,7 @@ module.exports = (req, res, next) => {
       async (error, decoded) => {
         try {
           // 인증 결과 에러가 나타나면 클라이언트와 서버에 모두 에러를 던지고 미들웨어 종료
-          if (error) {
-            throw new CustomError("UNAUTHORIZED");
-          }
+          if (error) throw new CustomError("UNAUTHORIZED");
 
           const user = await User.findOne({
             where: { userId: decoded.userId },

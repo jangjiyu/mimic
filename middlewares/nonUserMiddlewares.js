@@ -9,9 +9,7 @@ module.exports = (req, res, next) => {
     if (authorization) {
       const [authType, authToken] = (authorization || "").split(" ");
 
-      if (authType !== "Bearer") {
-        throw new CustomError("UNAUTHORIZED");
-      }
+      if (authType !== "Bearer") throw new CustomError("UNAUTHORIZED");
 
       jwt.verify(
         authToken,
@@ -19,9 +17,7 @@ module.exports = (req, res, next) => {
 
         async (error, decoded) => {
           try {
-            if (error) {
-              throw new CustomError("UNAUTHORIZED");
-            }
+            if (error) throw new CustomError("UNAUTHORIZED");
 
             const user = await User.findOne({
               where: { userId: decoded.userId },

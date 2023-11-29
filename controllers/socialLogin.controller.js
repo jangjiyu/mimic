@@ -27,9 +27,7 @@ exports.deleteKakao = async (req, res) => {
   const user = await User.findOne({
     where: { snsId: user_id, provider: "kakao" },
   });
-  if (!user) {
-    throw new CustomError("NOT_FOUND");
-  }
+  if (!user) throw new CustomError("NOT_FOUND");
 
   // 카카오 탈퇴 후 follow DB에서 해당 userId 데이터 삭제하는 과정 트렌젝션 설정
   await sequelize.transaction(

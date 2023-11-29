@@ -18,11 +18,9 @@ const uploadProfile = multer({
       // cb === callback
       const fileName = Math.floor(Math.random() * 100000000).toString();
       const extension = file.mimetype.split("/")[1];
-      if (!["png", "jpg", "jpeg", "JPG", "JPEG"].includes(extension)) {
-        return cb(
-          new Error("png, jpg, jpeg 확장자명의 파일만 업로드 가능합니다")
-        );
-      }
+      if (!["png", "jpg", "jpeg", "JPG", "JPEG"].includes(extension))
+        return cb(new Error("png, jpg, jpeg 확장자명의 파일만 업로드 가능합니다"));
+
       cb(null, `mimic/${Date.now()}-${fileName}.${extension}`);
     },
   }),
@@ -39,10 +37,7 @@ const deleteProfile = async (url) => {
       Key: filename,
     },
     function (err, data) {
-      if (err)
-        logger.error(
-          "[S3 profile 삭제 오류(/mimic)]" + err.name + " - " + err.message
-        );
+      if (err) logger.error("[S3 profile 삭제 오류(/mimic)]" + err.name + " - " + err.message);
     }
   );
   await s3.deleteObject(
@@ -51,13 +46,7 @@ const deleteProfile = async (url) => {
       Key: filename,
     },
     function (err, data) {
-      if (err)
-        logger.error(
-          "[S3 profile 삭제 오류(/resizingMimic)]" +
-            err.name +
-            " - " +
-            err.message
-        );
+      if (err) logger.error("[S3 profile 삭제 오류(/resizingMimic)]" + err.name + " - " + err.message);
     }
   );
 };

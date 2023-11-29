@@ -8,11 +8,9 @@ class TodoListController {
   // todo 피드 조회 [GET] /api/todolists?
   getTodoLists = async (req, res) => {
     const { userId } = res.locals.user;
-    const { mbti, filter } = await this.joi.getTodoListsSchema.validateAsync(
-      req.query
-    );
+    const { mbti, filter } = await this.joi.getTodoListsSchema.validateAsync(req.query);
 
-    const data = await this.todoListService.todoListsGet(userId, mbti, filter);
+    const data = await this.todoListService.todoListsGet2(userId, mbti, filter);
 
     res.status(200).json({ data });
   };

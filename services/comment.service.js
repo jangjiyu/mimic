@@ -7,9 +7,7 @@ class CommentService {
   createComment = async (userId, todoId, comment) => {
     const getTodo = await Todo.findOne({ where: { todoId } });
 
-    if (!getTodo) {
-      throw new CustomError("NOT_FOUND");
-    }
+    if (!getTodo) throw new CustomError("NOT_FOUND");
 
     // 댓글 생성하고 댓글 개수 update하는 과정 트렌젝션 설정
     await sequelize.transaction(
@@ -43,12 +41,8 @@ class CommentService {
   deleteComment = async (userId, commentId) => {
     const comment = await Comment.findOne({ where: { commentId } });
 
-    if (!comment) {
-      throw new CustomError("NOT_FOUND");
-    }
-    if (userId !== comment.userId) {
-      throw new CustomError("FORBIDDEN");
-    }
+    if (!comment) throw new CustomError("NOT_FOUND");
+    if (userId !== comment.userId) throw new CustomError("FORBIDDEN");
 
     // 댓글 삭제하고 댓글 개수 update하는 과정 트렌젝션 설정
     // ISOLATION_LEVELS.READ_UNCOMMITTED을 설정하여 sql deadlock 방지

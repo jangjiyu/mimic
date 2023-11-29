@@ -1,4 +1,4 @@
-const redisClient = require("../utils/redisConnect");
+const redisClient = require("../config/redisConnect");
 const { calculateToday } = require("../utils/date");
 const redisCli = redisClient.v4;
 const localDate = calculateToday();
