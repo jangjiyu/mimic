@@ -1,6 +1,5 @@
 const { ChallengedTodo, Todo, User, Follow, sequelize } = require("../models");
-const { Transaction } = require("sequelize");
-const { Op } = require("sequelize");
+const { Transaction, Op } = require("sequelize");
 const CustomError = require("../errors/customError");
 const { calculateToday } = require("../utils/date");
 const Query = require("../utils/query");
@@ -12,7 +11,7 @@ class MyTodoController {
   challengedTodoCreate = async (todoId, userId) => {
     const todayDate = calculateToday();
     //todoId가 Todos테이블에 존재하는건지 유효성 체크
-    const todoData = await Todo.findOne({ where: { todoId: todoId } });
+    const todoData = await Todo.findOne({ where: { todoId } });
 
     if (!todoData) {
       throw new CustomError("NOT_FOUND");
@@ -20,13 +19,11 @@ class MyTodoController {
     if (!todoData.mbti) {
       throw new CustomError("BAD_REQUEST");
     }
-
     if (todoData.userId === userId) {
       throw new CustomError("BAD_REQUEST");
     }
 
     //오늘 날짜 + userId(todayDate, userId),
-
     const todayChallengedTodoData = await ChallengedTodo.findOne({
       where: {
         [Op.and]: [{ date: todayDate }, { userId }],
@@ -52,7 +49,6 @@ class MyTodoController {
           },
           { transaction }
         );
-
         //challengedTodoData에서 originTodoId의 갯수 가져오기
         const [challengedTodoData] = await ChallengedTodo.findAll({
           attributes: [[sequelize.fn("COUNT", sequelize.col("userId")), "COUNT"]],
@@ -61,7 +57,6 @@ class MyTodoController {
           },
           transaction,
         });
-
         //challengedTodos에 있는 todo갯수 반영해주기
         await Todo.update(
           {
@@ -78,6 +73,7 @@ class MyTodoController {
     const userChallengedTodoData = await ChallengedTodo.findOne({
       where: { challengedTodoId },
     });
+
     if (!userChallengedTodoData) {
       throw new CustomError("NOT_FOUND");
     }
@@ -90,10 +86,9 @@ class MyTodoController {
       async (transaction) => {
         //challengedTodoId를 기준으로 데이터 삭제
         await ChallengedTodo.destroy({
-          where: { challengedTodoId: challengedTodoId },
+          where: { challengedTodoId },
           transaction,
         });
-
         const [challengedTodoData] = await ChallengedTodo.findAll({
           attributes: [[sequelize.fn("COUNT", sequelize.col("userId")), "COUNT"]],
           where: {
@@ -101,7 +96,6 @@ class MyTodoController {
           },
           transaction,
         });
-
         //Todos테이블에 도전갯수 업데이트
         await Todo.update(
           {
@@ -109,9 +103,7 @@ class MyTodoController {
           },
           { where: { todoId: deletedTodoId }, transaction }
         );
-
-        //challengedTodo에서 userId를 기준으로 그룹을 하데 조건은 isCompleted가 true인 것들만
-
+        //challengedTodo에서 userId를 기준으로, 조건은 isCompleted가 true인 것들만
         const [challengedTodoDatas] = await ChallengedTodo.findAll({
           attributes: [[sequelize.fn("COUNT", sequelize.col("userId")), "COUNT"]],
           where: {
@@ -119,7 +111,6 @@ class MyTodoController {
           },
           transaction,
         });
-
         await User.update(
           { challengeCounts: challengedTodoDatas.dataValues.COUNT },
           { where: { userId }, transaction }
@@ -130,10 +121,9 @@ class MyTodoController {
 
   // 오늘의 도전 todo 완료/진행중 처리 [PUT] /:challengedTodoId/challenged
   challengedTodoComplete = async (challengedTodoId, userId) => {
-    //이용자가 오늘 등록한 challengedTodoId를 진행완료 했는지 못했는지 반영
-    //isCompleted boolean값을 변경시켜주어야함
-    //이용자가 오늘 도전한 todo가 있는 없는지 체크
-    //오늘 날짜 + userId(todayDate, userId),
+    // 이용자가 오늘 등록한 challengedTodoId를 진행완료 했는지 못했는지 반영
+    // isCompleted boolean값을 변경시켜주어야함
+    // 이용자가 오늘 도전한 todo가 있는 없는지 체크
     const todayDate = calculateToday();
     const todaychallengedTodoData = await ChallengedTodo.findOne({
       where: {
@@ -178,7 +168,9 @@ class MyTodoController {
           { where: { userId } },
           { transaction }
         );
+
         const isCompleted = !isCompletedCheck;
+
         return isCompleted;
       }
     );
@@ -186,8 +178,8 @@ class MyTodoController {
 
   // 오늘의 제안 todo 작성 [POST] /api/mytodos
   todoCreate = async (todo, userId) => {
-    //todo 테이블에 todo, user의mbti,nickname,userId,를 넣어야함
-    //mytodo테이블에도 동시에 담기(서버단에서 작성된 날짜기준으로 넣는다.)
+    // todo 테이블에 todo, user의 mbti,nickname,userId를 넣어야 함
+    // mytodo 테이블에도 동시에 담기 (서버단에서 작성된 날짜기준으로 넣는다)
     const todayDate = calculateToday();
     const userData = await User.findOne({ where: { userId } });
 
@@ -254,7 +246,7 @@ class MyTodoController {
       { isolationLevel: Transaction.ISOLATION_LEVELS.READ_UNCOMMITTED },
       async (transaction) => {
         await Todo.destroy({
-          where: { todoId: todoId },
+          where: { todoId },
           transaction,
         });
 

@@ -6,6 +6,7 @@ class CommentService {
   // 댓글 작성 [POST] /api/comments/:todoId
   createComment = async (userId, todoId, comment) => {
     const getTodo = await Todo.findOne({ where: { todoId } });
+
     if (!getTodo) {
       throw new CustomError("NOT_FOUND");
     }
@@ -41,6 +42,7 @@ class CommentService {
   // 댓글 삭제 [DELETE] /api/comments/:commentId
   deleteComment = async (userId, commentId) => {
     const comment = await Comment.findOne({ where: { commentId } });
+
     if (!comment) {
       throw new CustomError("NOT_FOUND");
     }

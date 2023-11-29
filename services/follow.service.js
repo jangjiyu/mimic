@@ -8,9 +8,11 @@ class FollowService {
   // 팔로우 목록 조회 [GET] /api/follows/:userId
   followListGet = async (userId) => {
     const checkUserId = await User.findByPk(userId);
+
     if (!checkUserId) {
       throw new CustomError("NOT_FOUND");
     }
+
     const myFollowerlist = await sequelize.query(this.query.getFollwerlist, {
       bind: { userIdFollowing: userId },
       type: sequelize.QueryTypes.SELECT,
@@ -30,15 +32,18 @@ class FollowService {
   // 팔로우 추가 및 삭제 [PUT] /api/follows/:userId
   followListEdit = async (userId, elseUserId) => {
     const checkUserId = await User.findByPk(elseUserId);
+
     if (!checkUserId) {
       throw new CustomError("NOT_FOUND");
     }
     if (userId === elseUserId) {
       throw new CustomError("BAD_REQUEST");
     }
+
     const checkFollow = await Follow.findOne({
       where: { userIdFollowing: elseUserId, userIdFollower: userId },
     });
+
     if (!checkFollow) {
       await Follow.create({
         userIdFollowing: elseUserId,
