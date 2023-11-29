@@ -7,7 +7,7 @@ const cors = require("cors");
 const indexRouter = require("./routes");
 const kakaoPassport = require("./passport/index");
 const { sequelize } = require("./models");
-const { routerError, errorHandler } = require("./middlewares/errorHandler");
+const { errorHandler } = require("./middlewares/errorHandler");
 const { emailAuthTableSchedule, visitorCountSchedule } = require("./utils/setSchedule");
 require("dotenv").config();
 
@@ -47,7 +47,6 @@ app.use(express.json());
 app.use("/api", indexRouter);
 
 // errorHandler
-app.use(routerError);
 app.use(errorHandler);
 
 app.listen(port, "0.0.0.0", () => {

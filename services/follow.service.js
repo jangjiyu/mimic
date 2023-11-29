@@ -1,5 +1,5 @@
 const { Follow, User, sequelize } = require("../models");
-const Boom = require("@hapi/boom");
+const CustomError = require("../errors/customError");
 const Query = require("../utils/query");
 
 class FollowService {
@@ -9,7 +9,7 @@ class FollowService {
   followListGet = async (userId) => {
     const checkUserId = await User.findByPk(userId);
     if (!checkUserId) {
-      throw Boom.badRequest("존재하지 않는 사용자 입니다.");
+      throw new CustomError("NOT_FOUND");
     }
     const myFollowerlist = await sequelize.query(this.query.getFollwerlist, {
       bind: { userIdFollowing: userId },
@@ -31,10 +31,10 @@ class FollowService {
   followListEdit = async (userId, elseUserId) => {
     const checkUserId = await User.findByPk(elseUserId);
     if (!checkUserId) {
-      throw Boom.badRequest("존재하지 않는 사용자 입니다.");
+      throw new CustomError("NOT_FOUND");
     }
     if (userId === elseUserId) {
-      throw Boom.badRequest("자기 자신은 팔로우를 하지 못합니다.");
+      throw new CustomError("BAD_REQUEST");
     }
     const checkFollow = await Follow.findOne({
       where: { userIdFollowing: elseUserId, userIdFollower: userId },

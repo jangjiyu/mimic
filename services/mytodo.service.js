@@ -1,7 +1,7 @@
 const { ChallengedTodo, Todo, User, Follow, sequelize } = require("../models");
 const { Transaction } = require("sequelize");
 const { Op } = require("sequelize");
-const Boom = require("@hapi/boom");
+const CustomError = require("../errors/customError");
 const { calculateToday } = require("../utils/date");
 const Query = require("../utils/query");
 
@@ -12,18 +12,17 @@ class MyTodoController {
   challengedTodoCreate = async (todoId, userId) => {
     const todayDate = calculateToday();
     //todoId가 Todos테이블에 존재하는건지 유효성 체크
-
     const todoData = await Todo.findOne({ where: { todoId: todoId } });
 
     if (!todoData) {
-      throw Boom.badRequest("존재하지 않는 todo 입니다.");
+      throw new CustomError("NOT_FOUND");
     }
     if (!todoData.mbti) {
-      throw Boom.badRequest("MBTI 정보 등록바랍니다.");
+      throw new CustomError("BAD_REQUEST");
     }
 
     if (todoData.userId === userId) {
-      throw Boom.badRequest("본인 글은 도전할 수 없습니다.");
+      throw new CustomError("BAD_REQUEST");
     }
 
     //오늘 날짜 + userId(todayDate, userId),
@@ -36,7 +35,7 @@ class MyTodoController {
 
     //이미 오늘 도전을 담았는지 challengedtodo 데이터 체크
     if (todayChallengedTodoData) {
-      throw Boom.badRequest("오늘의 todo가 이미 등록되었습니다.");
+      throw new CustomError("BAD_REQUEST");
     }
 
     // 도전 생성하고 도전 개수 update하는 과정 트렌젝션 설정
@@ -56,9 +55,7 @@ class MyTodoController {
 
         //challengedTodoData에서 originTodoId의 갯수 가져오기
         const [challengedTodoData] = await ChallengedTodo.findAll({
-          attributes: [
-            [sequelize.fn("COUNT", sequelize.col("userId")), "COUNT"],
-          ],
+          attributes: [[sequelize.fn("COUNT", sequelize.col("userId")), "COUNT"]],
           where: {
             originTodoId: todoId,
           },
@@ -82,7 +79,7 @@ class MyTodoController {
       where: { challengedTodoId },
     });
     if (!userChallengedTodoData) {
-      throw Boom.badRequest("삭제되었거나 존재하지 않는 todo 입니다.");
+      throw new CustomError("NOT_FOUND");
     }
 
     //삭제되어지는 todoId
@@ -98,9 +95,7 @@ class MyTodoController {
         });
 
         const [challengedTodoData] = await ChallengedTodo.findAll({
-          attributes: [
-            [sequelize.fn("COUNT", sequelize.col("userId")), "COUNT"],
-          ],
+          attributes: [[sequelize.fn("COUNT", sequelize.col("userId")), "COUNT"]],
           where: {
             originTodoId: deletedTodoId,
           },
@@ -118,9 +113,7 @@ class MyTodoController {
         //challengedTodo에서 userId를 기준으로 그룹을 하데 조건은 isCompleted가 true인 것들만
 
         const [challengedTodoDatas] = await ChallengedTodo.findAll({
-          attributes: [
-            [sequelize.fn("COUNT", sequelize.col("userId")), "COUNT"],
-          ],
+          attributes: [[sequelize.fn("COUNT", sequelize.col("userId")), "COUNT"]],
           where: {
             [Op.and]: [{ isCompleted: true }, { userId }],
           },
@@ -149,7 +142,7 @@ class MyTodoController {
     });
 
     if (!todaychallengedTodoData) {
-      throw Boom.badRequest("오늘 도전한 todo가 없습니다.");
+      throw new CustomError("NOT_FOUND");
     }
 
     const isCompletedCheck = todaychallengedTodoData.isCompleted;
@@ -166,16 +159,12 @@ class MyTodoController {
 
         //이용자가 오늘 작성한 todo는 있지만 프론트에서 보낸 challengedTodoId가 올바르지 않는경우 에러처리
         //params는 문자열로 들어오기에 숫자열로 변경후 비교
-        if (
-          Number(challengedTodoId) !== todaychallengedTodoData.challengedTodoId
-        ) {
-          throw Boom.badRequest("challengedTodoId가 올바르지 않습니다.");
+        if (Number(challengedTodoId) !== todaychallengedTodoData.challengedTodoId) {
+          throw new CustomError("BAD_REQUEST");
         }
 
         const [challengedTodoData] = await ChallengedTodo.findAll({
-          attributes: [
-            [sequelize.fn("COUNT", sequelize.col("userId")), "COUNT"],
-          ],
+          attributes: [[sequelize.fn("COUNT", sequelize.col("userId")), "COUNT"]],
           where: {
             [Op.and]: [{ isCompleted: true }, { userId }],
           },
@@ -203,10 +192,10 @@ class MyTodoController {
     const userData = await User.findOne({ where: { userId } });
 
     if (!userData) {
-      throw Boom.badRequest("사용자 정보가 없습니다.");
+      throw new CustomError("NOT_FOUND");
     }
     if (!userData.mbti) {
-      throw Boom.badRequest("mbti 정보를 등록후 작성바랍니다.");
+      throw new CustomError("BAD_REQUEST");
     }
 
     const checkTodoData = await Todo.findOne({
@@ -216,7 +205,7 @@ class MyTodoController {
     });
 
     if (checkTodoData) {
-      throw Boom.badRequest("오늘의 todo 작성을 이미 하셨습니다.");
+      throw new CustomError("BAD_REQUEST");
     }
 
     await sequelize.transaction(
@@ -234,9 +223,7 @@ class MyTodoController {
         );
 
         const [userTodoData] = await Todo.findAll({
-          attributes: [
-            [sequelize.fn("COUNT", sequelize.col("userId")), "COUNT"],
-          ],
+          attributes: [[sequelize.fn("COUNT", sequelize.col("userId")), "COUNT"]],
           where: {
             userId,
           },
@@ -260,7 +247,7 @@ class MyTodoController {
     });
 
     if (!todoData) {
-      throw Boom.badRequest("이미 삭제되었거나 없는 todo입니다.");
+      throw new CustomError("NOT_FOUND");
     }
 
     await sequelize.transaction(
@@ -272,9 +259,7 @@ class MyTodoController {
         });
 
         const [userTodoData] = await Todo.findAll({
-          attributes: [
-            [sequelize.fn("COUNT", sequelize.col("userId")), "COUNT"],
-          ],
+          attributes: [[sequelize.fn("COUNT", sequelize.col("userId")), "COUNT"]],
           where: {
             userId,
           },
@@ -302,21 +287,11 @@ class MyTodoController {
         ],
       }),
       Follow.findAll({
-        attributes: [
-          [
-            sequelize.fn("COUNT", sequelize.col("userIdFollower")),
-            "followingCounts",
-          ],
-        ],
+        attributes: [[sequelize.fn("COUNT", sequelize.col("userIdFollower")), "followingCounts"]],
         where: { userIdFollower: userId },
       }),
       Follow.findAll({
-        attributes: [
-          [
-            sequelize.fn("COUNT", sequelize.col("userIdFollowing")),
-            "followerCounts",
-          ],
-        ],
+        attributes: [[sequelize.fn("COUNT", sequelize.col("userIdFollowing")), "followerCounts"]],
         where: { userIdFollowing: userId },
       }),
     ]);
@@ -338,33 +313,17 @@ class MyTodoController {
 
   // 타인의 todo 피드 조회 [GET] /api/mytodos/:userId
   getUserTodo = async (userId, elseUserId) => {
-    const [
-      userInfo,
-      [followingCounts],
-      [followerCounts],
-      challengedTodos,
-      isFollowed,
-    ] = await Promise.all([
+    const [userInfo, [followingCounts], [followerCounts], challengedTodos, isFollowed] = await Promise.all([
       User.findOne({
         where: { userId: elseUserId },
         include: [{ model: Todo, order: [["createdAt", "DESC"]], limit: 20 }],
       }),
       Follow.findAll({
-        attributes: [
-          [
-            sequelize.fn("COUNT", sequelize.col("userIdFollower")),
-            "followingCounts",
-          ],
-        ],
+        attributes: [[sequelize.fn("COUNT", sequelize.col("userIdFollower")), "followingCounts"]],
         where: { userIdFollower: elseUserId },
       }),
       Follow.findAll({
-        attributes: [
-          [
-            sequelize.fn("COUNT", sequelize.col("userIdFollowing")),
-            "followerCounts",
-          ],
-        ],
+        attributes: [[sequelize.fn("COUNT", sequelize.col("userIdFollowing")), "followerCounts"]],
         where: { userIdFollowing: elseUserId },
       }),
       sequelize.query(this.query.getChallengedTodosQuery, {
@@ -377,7 +336,7 @@ class MyTodoController {
     ]);
 
     if (!userInfo) {
-      throw Boom.badRequest("존재하지 않거나 탈퇴한 회원입니다.");
+      throw new CustomError("NOT_FOUND");
     }
 
     return {

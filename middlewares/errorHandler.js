@@ -1,25 +1,17 @@
 const { logger } = require("../utils/logger");
-const Boom = require("@hapi/boom");
+const errorCodes = require("../errors/errorCodes");
 
 module.exports = {
   errorHandler: (err, req, res, next) => {
-    res.locals.message = err.message;
-    res.locals.error = process.env.NODE_ENV !== "production" ? err : {};
-    logger.error(err.name + " - " + err.message);
-    res.status(err.output ? err.output.statusCode : 500).json(
-      err.output
-        ? { errorMessage: err.message }
-        : { errorMessage: "[" + err.name + "] " + "There was a problem processing your request. Please try again." }
-    );
-  },
-  routerError: (req, res, next) => {
-    try {
-      throw Boom.badGateway(
-        `${req.method} ${req.originalUrl} 라우터 에러입니다.`
-      );
-    } catch (err) {
-      next(err);
-    }
+    const codeName = (err && err.codeName) || null;
+    let error = errorCodes[codeName] || errorCodes["INTERNAL_SERVER_ERROR"];
+
+    logger.error(error.name + " - " + error.message);
+
+    //* joi 라이브러리 사용한 validation 검사 에러
+    if (err.name === "ValidationError") error = errorCodes["BAD_REQUEST"];
+
+    return res.status(error.statusCode).json({ errorMessage: error.message });
   },
   //controllers부분 try catch 생략 미들웨어
   wrapAsyncController: function tryCatch(fn) {

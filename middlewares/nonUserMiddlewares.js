@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const { User } = require("../models");
-const Boom = require("@hapi/boom");
+const CustomError = require("../errors/customError");
 
 module.exports = (req, res, next) => {
   try {
@@ -10,7 +10,7 @@ module.exports = (req, res, next) => {
       const [authType, authToken] = (authorization || "").split(" ");
 
       if (authType !== "Bearer") {
-        throw Boom.badRequest("로그인 후 사용해주세요. Bearer 토큰이 아님.");
+        throw new CustomError("UNAUTHORIZED");
       }
 
       jwt.verify(
@@ -20,9 +20,7 @@ module.exports = (req, res, next) => {
         async (error, decoded) => {
           try {
             if (error) {
-              throw Boom.badRequest(
-                "토큰 인증 실패 - 이용에 문제가 있습니다. 관리자에게 문의해주세요."
-              );
+              throw new CustomError("UNAUTHORIZED");
             }
 
             const user = await User.findOne({

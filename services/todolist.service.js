@@ -1,8 +1,7 @@
 const { Todo, ChallengedTodo, Follow, Mbti, sequelize } = require("../models");
-const { QueryTypes } = require("sequelize");
-const { Op } = require("sequelize");
+const { QueryTypes, Op } = require("sequelize");
 const date = require("../utils/date");
-const Boom = require("@hapi/boom");
+const CustomError = require("../errors/customError");
 const Query = require("../utils/query");
 class TodoListService {
   query = new Query();
@@ -19,8 +18,7 @@ class TodoListService {
           isChallenged:
             myChallengedTodos.findIndex(
               (myChallengedTodo) =>
-                myChallengedTodo.originTodoId === todo.todoId &&
-                myChallengedTodo.isCompleted === true
+                myChallengedTodo.originTodoId === todo.todoId && myChallengedTodo.isCompleted === true
             ) !== -1
               ? true
               : false,
@@ -104,31 +102,30 @@ class TodoListService {
   todoGet = async (userId, profile, todoId) => {
     const todo = await Todo.findByPk(todoId);
     if (!todo) {
-      throw Boom.badRequest("존재하지 않거나 삭제된 Todo입니다.");
+      throw new CustomError("NOT_FOUND");
     }
 
     const today = date.calculateToday();
 
-    const [[todoInfo], comments, todaysChallenge, isFollowed] =
-      await Promise.all([
-        sequelize.query(this.query.getTodoQuery, {
-          bind: { todoId },
-          type: QueryTypes.SELECT,
-        }),
-        sequelize.query(this.query.getCommentsQuery, {
-          bind: { todoId },
-          type: QueryTypes.SELECT,
-        }),
-        ChallengedTodo.findOne({
-          where: {
-            userId,
-            date: today,
-          },
-        }),
-        Follow.findOne({
-          where: { userIdFollower: userId, userIdFollowing: todo.userId },
-        }),
-      ]);
+    const [[todoInfo], comments, todaysChallenge, isFollowed] = await Promise.all([
+      sequelize.query(this.query.getTodoQuery, {
+        bind: { todoId },
+        type: QueryTypes.SELECT,
+      }),
+      sequelize.query(this.query.getCommentsQuery, {
+        bind: { todoId },
+        type: QueryTypes.SELECT,
+      }),
+      ChallengedTodo.findOne({
+        where: {
+          userId,
+          date: today,
+        },
+      }),
+      Follow.findOne({
+        where: { userIdFollower: userId, userIdFollowing: todo.userId },
+      }),
+    ]);
 
     return {
       todoInfo,
