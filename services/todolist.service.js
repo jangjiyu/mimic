@@ -1,8 +1,9 @@
 const { Todo, ChallengedTodo, Follow, Mbti, sequelize } = require("../models");
 const { QueryTypes, Op } = require("sequelize");
-const date = require("../utils/date");
+const { calculateToday, calculateYesterdayMidnight } = require("../utils/date");
 const CustomError = require("../errors/customError");
 const Query = require("../utils/query");
+
 class TodoListService {
   query = new Query();
 
@@ -105,7 +106,7 @@ class TodoListService {
       throw new CustomError("NOT_FOUND");
     }
 
-    const today = date.calculateToday();
+    const today = calculateToday();
 
     const [[todoInfo], comments, todaysChallenge, isFollowed] = await Promise.all([
       sequelize.query(this.query.getTodoQuery, {
@@ -151,7 +152,7 @@ class TodoListService {
 
   // 현재 인기있는 피드 top5 [GET] /api/todolists/ranking
   rankingGet = async () => {
-    const yesterday = date.calculateYesterdayMidnight();
+    const yesterday = calculateYesterdayMidnight();
 
     const challengeRanking = await Todo.findAll({
       where: {
