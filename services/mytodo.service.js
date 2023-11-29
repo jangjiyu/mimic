@@ -2,26 +2,17 @@ const { ChallengedTodo, Todo, User, Follow, sequelize } = require("../models");
 const { Transaction, Op } = require("sequelize");
 const CustomError = require("../errors/customError");
 const { calculateToday } = require("../utils/date");
-const Query = require("../utils/query");
 
 class MyTodoController {
-  query = new Query();
-
   // 오늘의 도전 todo 등록 [POST] /:todoId/challenged
   challengedTodoCreate = async (todoId, userId) => {
     const todayDate = calculateToday();
     //todoId가 Todos테이블에 존재하는건지 유효성 체크
     const todoData = await Todo.findOne({ where: { todoId } });
 
-    if (!todoData) {
-      throw new CustomError("NOT_FOUND");
-    }
-    if (!todoData.mbti) {
-      throw new CustomError("BAD_REQUEST");
-    }
-    if (todoData.userId === userId) {
-      throw new CustomError("BAD_REQUEST");
-    }
+    if (!todoData) throw new CustomError("NOT_FOUND");
+    if (!todoData.mbti) throw new CustomError("BAD_REQUEST");
+    if (todoData.userId === userId) throw new CustomError("BAD_REQUEST");
 
     //오늘 날짜 + userId(todayDate, userId),
     const todayChallengedTodoData = await ChallengedTodo.findOne({
@@ -31,9 +22,7 @@ class MyTodoController {
     });
 
     //이미 오늘 도전을 담았는지 challengedtodo 데이터 체크
-    if (todayChallengedTodoData) {
-      throw new CustomError("BAD_REQUEST");
-    }
+    if (todayChallengedTodoData) throw new CustomError("BAD_REQUEST");
 
     // 도전 생성하고 도전 개수 update하는 과정 트렌젝션 설정
     await sequelize.transaction(
@@ -74,9 +63,7 @@ class MyTodoController {
       where: { challengedTodoId },
     });
 
-    if (!userChallengedTodoData) {
-      throw new CustomError("NOT_FOUND");
-    }
+    if (!userChallengedTodoData) throw new CustomError("NOT_FOUND");
 
     //삭제되어지는 todoId
     const deletedTodoId = userChallengedTodoData.originTodoId;
@@ -131,9 +118,7 @@ class MyTodoController {
       },
     });
 
-    if (!todaychallengedTodoData) {
-      throw new CustomError("NOT_FOUND");
-    }
+    if (!todaychallengedTodoData) throw new CustomError("NOT_FOUND");
 
     const isCompletedCheck = todaychallengedTodoData.isCompleted;
 
@@ -149,9 +134,7 @@ class MyTodoController {
 
         //이용자가 오늘 작성한 todo는 있지만 프론트에서 보낸 challengedTodoId가 올바르지 않는경우 에러처리
         //params는 문자열로 들어오기에 숫자열로 변경후 비교
-        if (Number(challengedTodoId) !== todaychallengedTodoData.challengedTodoId) {
-          throw new CustomError("BAD_REQUEST");
-        }
+        if (Number(challengedTodoId) !== todaychallengedTodoData.challengedTodoId) throw new CustomError("BAD_REQUEST");
 
         const [challengedTodoData] = await ChallengedTodo.findAll({
           attributes: [[sequelize.fn("COUNT", sequelize.col("userId")), "COUNT"]],
@@ -183,12 +166,8 @@ class MyTodoController {
     const todayDate = calculateToday();
     const userData = await User.findOne({ where: { userId } });
 
-    if (!userData) {
-      throw new CustomError("NOT_FOUND");
-    }
-    if (!userData.mbti) {
-      throw new CustomError("BAD_REQUEST");
-    }
+    if (!userData) throw new CustomError("NOT_FOUND");
+    if (!userData.mbti) throw new CustomError("BAD_REQUEST");
 
     const checkTodoData = await Todo.findOne({
       where: {
@@ -196,9 +175,7 @@ class MyTodoController {
       },
     });
 
-    if (checkTodoData) {
-      throw new CustomError("BAD_REQUEST");
-    }
+    if (checkTodoData) throw new CustomError("BAD_REQUEST");
 
     await sequelize.transaction(
       { isolationLevel: Transaction.ISOLATION_LEVELS.READ_UNCOMMITTED },
@@ -238,9 +215,7 @@ class MyTodoController {
       where: { todoId, userId },
     });
 
-    if (!todoData) {
-      throw new CustomError("NOT_FOUND");
-    }
+    if (!todoData) throw new CustomError("NOT_FOUND");
 
     await sequelize.transaction(
       { isolationLevel: Transaction.ISOLATION_LEVELS.READ_UNCOMMITTED },
@@ -318,18 +293,23 @@ class MyTodoController {
         attributes: [[sequelize.fn("COUNT", sequelize.col("userIdFollowing")), "followerCounts"]],
         where: { userIdFollowing: elseUserId },
       }),
-      sequelize.query(this.query.getChallengedTodosQuery, {
-        bind: { userId: elseUserId },
-        type: sequelize.QueryTypes.SELECT,
+      ChallengedTodo.findAll({
+        where: { userId: elseUserId },
+        order: [["createdAt", "DESC"]],
+        include: [
+          {
+            model: Todo,
+            where: { todoId: sequelize.col("originTodoId") },
+            attributes: ["challengedCounts", "commentCounts"],
+          },
+        ],
       }),
       Follow.findOne({
         where: { userIdFollower: userId, userIdFollowing: elseUserId },
       }),
     ]);
 
-    if (!userInfo) {
-      throw new CustomError("NOT_FOUND");
-    }
+    if (!userInfo) throw new CustomError("NOT_FOUND");
 
     return {
       userInfo: {

@@ -14,15 +14,9 @@ class UserService {
       where: { email, authCheck: true },
     });
 
-    if (checkEamilDuplicate) {
-      throw new CustomError("CONFLICT");
-    }
-    if (password !== confirmPassword) {
-      throw new CustomError("BAD_REQUEST");
-    }
-    if (!authResult) {
-      throw new CustomError("BAD_REQUEST");
-    }
+    if (checkEamilDuplicate) throw new CustomError("CONFLICT");
+    if (password !== confirmPassword) throw new CustomError("BAD_REQUEST");
+    if (!authResult) throw new CustomError("BAD_REQUEST");
 
     const bcrPassword = bcrypt.hashSync(password, parseInt(parseInt(process.env.SALT)));
     const userData = await User.create({
@@ -48,15 +42,11 @@ class UserService {
   userLogin = async (email, password) => {
     const userData = await User.findOne({ where: { email } });
 
-    if (!userData) {
-      throw new CustomError("NOT_FOUND");
-    }
+    if (!userData) throw new CustomError("NOT_FOUND");
 
     const bcrCompareResult = await bcrypt.compare(password, userData.password);
 
-    if (!bcrCompareResult) {
-      throw new CustomError("UNAUTHORIZED");
-    }
+    if (!bcrCompareResult) throw new CustomError("UNAUTHORIZED");
 
     const token = createToken(userData);
 
@@ -67,16 +57,12 @@ class UserService {
   authEmail = async (email) => {
     const dupCheck = await User.findOne({ where: { email } });
 
-    if (dupCheck) {
-      throw new CustomError("CONFLICT");
-    }
+    if (dupCheck) throw new CustomError("CONFLICT");
 
     // 중복 아닌 경우 emailAuth 테이블에 데이터 존재하는지 확인하고 없으면 인증번호 전송 / 존재하면 삭제하고 인증번호 재전송
     const exEmailAuth = await EmailAuth.findOne({ where: { email } });
 
-    if (exEmailAuth) {
-      await EmailAuth.destroy({ where: { email } });
-    }
+    if (exEmailAuth) await EmailAuth.destroy({ where: { email } });
 
     sendEmail(email);
   };
@@ -85,12 +71,9 @@ class UserService {
   checkEmailAuth = async (email, emailAuthNumber) => {
     const authEmailData = await EmailAuth.findOne({ where: { email } });
 
-    if (!authEmailData) {
-      throw new CustomError("NOT_FOUND");
-    }
-    if (authEmailData.authNumber !== emailAuthNumber) {
-      throw new CustomError("BAD_REQUEST");
-    }
+    if (!authEmailData) throw new CustomError("NOT_FOUND");
+
+    if (authEmailData.authNumber !== emailAuthNumber) throw new CustomError("BAD_REQUEST");
 
     await EmailAuth.update({ authCheck: true }, { where: { email } });
   };
@@ -119,29 +102,22 @@ class UserService {
   // 회원 정보 변경 [PUT] /api/accounts
   userInfoChange = async (userId, password, newPassword, confirmPassword, nickname, mbti) => {
     let userData = await User.findByPk(userId);
+    let bcrPassword;
 
     if (password) {
       const bcrCompareResult = await bcrypt.compare(password, userData.password);
 
-      if (!bcrCompareResult) {
-        throw new CustomError("UNAUTHORIZED");
-      }
-      if (newPassword !== confirmPassword) {
-        throw new CustomError("BAD_REQUEST");
-      }
+      if (!bcrCompareResult) throw new CustomError("UNAUTHORIZED");
+      if (newPassword !== confirmPassword) throw new CustomError("BAD_REQUEST");
 
-      const bcrPassword = bcrypt.hashSync(newPassword, parseInt(process.env.SALT));
-
-      userData = await userData.update({ password: bcrPassword });
+      bcrPassword = bcrypt.hashSync(newPassword, parseInt(process.env.SALT));
     }
 
-    if (nickname) {
-      userData = await userData.update({ nickname });
-    }
-
-    if (mbti) {
-      userData = await userData.update({ mbti });
-    }
+    await userData.update({
+      password: bcrPassword || userData.password,
+      nickname: nickname || userData.nickname,
+      mbti: mbti || userData.mbti,
+    });
 
     const token = createToken(userData);
 
@@ -152,9 +128,7 @@ class UserService {
   userProfileChange = async (userId, profile) => {
     let userData = await User.findByPk(userId);
 
-    if (userData.profile !== "none") {
-      await multer.deleteProfile(userData.profile);
-    }
+    if (userData.profile !== "none") await multer.deleteProfile(userData.profile);
 
     userData = await userData.update({ profile });
 
@@ -168,9 +142,7 @@ class UserService {
     const userData = await User.findByPk(userId);
     const bcrCompareResult = await bcrypt.compare(password, userData.password);
 
-    if (!bcrCompareResult) {
-      throw new CustomError("UNAUTHORIZED");
-    }
+    if (!bcrCompareResult) throw new CustomError("UNAUTHORIZED");
 
     // 회원탈퇴 후 follow DB에서 해당 userId 데이터 삭제하는 과정 트렌젝션 설정
     await sequelize.transaction(
