@@ -30,7 +30,16 @@ const sendEmail = (email) => {
           <p><sub>∗ 인증 번호 유효 시간이 지난 경우, 다시 신청 후 진행해 주세요.</sub></p>`,
   };
   const transporter = nodemailer.createTransport(configOptions);
-  transporter.sendMail(emailForm);
+
+  transporter
+    .sendMail(emailForm)
+    .then((info) => {
+      console.log("Message sent: %s", info.messageId);
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+
   EmailAuth.create({ email, authNumber });
 };
 
