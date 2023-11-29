@@ -121,7 +121,7 @@
  ┃ ┃  ┣ todolist.service.test.js
  ┃ ┃  ┗ user.service.test.js
  ┣ 📂config
- ┃ ┣ 📜mysqlConfig.js
+ ┃ ┣ 📜config.js
  ┃ ┗ 📜redisConnect.js
  ┣ 📂controllers
  ┃ ┣ 📜comment.controller.js
