@@ -3,7 +3,7 @@ const { EmailAuth, Count } = require("../models");
 const { Op } = require("sequelize");
 const logger = require("../utils/logger");
 const date = require("./date");
-const redisClient = require("./redisConnect");
+const redisClient = require("../config/redisConnect");
 const redisCli = redisClient.v4;
 
 module.exports = {
