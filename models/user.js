@@ -80,5 +80,17 @@ module.exports = class User extends Sequelize.Model {
       sourceKey: "userId",
       onDelete: "CASCADE",
     });
+    db.User.hasMany(db.Follow, {
+      foreignKey: "userIdFollower",
+      sourceKey: "userId",
+      onDelete: "CASCADE",
+      as: "follower",
+    });
+    db.User.hasMany(db.Follow, {
+      foreignKey: "userIdFollowing",
+      sourceKey: "userId",
+      onDelete: "CASCADE",
+      as: "following",
+    });
   }
 };

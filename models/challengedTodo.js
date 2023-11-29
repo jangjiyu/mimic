@@ -50,5 +50,10 @@ module.exports = class ChallengedTodo extends Sequelize.Model {
       targetKey: "userId",
       onDelete: "CASCADE",
     });
+    db.ChallengedTodo.belongsTo(db.Todo, {
+      foreignKey: "originTodoId",
+      targetKey: "todoId",
+      onDelete: "NO ACTION",
+    });
   }
 };
