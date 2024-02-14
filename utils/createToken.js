@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const envValue = require("../config/envConfig");
 
 const createToken = (userData) => {
   const payload = {
@@ -9,7 +10,7 @@ const createToken = (userData) => {
     profile: userData.profile,
   };
 
-  return jwt.sign(payload, process.env.MYSECRET_KEY, {
+  return jwt.sign(payload, envValue.MYSECRET_KEY, {
     expiresIn: "2d",
   });
 };

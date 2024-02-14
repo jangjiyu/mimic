@@ -5,6 +5,7 @@ const multer = require("../middlewares/multer");
 const CustomError = require("../errors/customError");
 const createToken = require("../utils/createToken");
 const sendEmail = require("../utils/nodeMailer");
+const envValue = require("../config/envConfig");
 
 class UserService {
   // 회원가입 [POST] /api/accounts/signup
@@ -18,7 +19,7 @@ class UserService {
     if (password !== confirmPassword) throw new CustomError("BAD_REQUEST");
     if (!authResult) throw new CustomError("BAD_REQUEST");
 
-    const bcrPassword = bcrypt.hashSync(password, parseInt(parseInt(process.env.SALT)));
+    const bcrPassword = bcrypt.hashSync(password, parseInt(parseInt(envValue.SALT)));
     const userData = await User.create({
       email,
       password: bcrPassword,
@@ -110,7 +111,7 @@ class UserService {
       if (!bcrCompareResult) throw new CustomError("UNAUTHORIZED");
       if (newPassword !== confirmPassword) throw new CustomError("BAD_REQUEST");
 
-      bcrPassword = bcrypt.hashSync(newPassword, parseInt(process.env.SALT));
+      bcrPassword = bcrypt.hashSync(newPassword, parseInt(envValue.SALT));
     }
 
     await userData.update({

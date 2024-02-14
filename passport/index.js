@@ -1,16 +1,16 @@
 const passport = require("passport");
 const KakaoStrategy = require("passport-kakao").Strategy;
 const { User } = require("../models");
-require("dotenv").config();
 const CustomError = require("../errors/customError");
+const envValue = require("../config/envConfig");
 
 module.exports = (app) => {
   app.use(passport.initialize()); // passport를 초기화 하기 위해서 passport.initialize 미들웨어 사용
   passport.use(
     new KakaoStrategy(
       {
-        clientID: process.env.KAKAO, // 카카오 로그인에서 발급받은 REST API 키z
-        callbackURL: process.env.KAKAO_URL, // 카카오 로그인 Redirect URI 경로
+        clientID: envValue.KAKAO, // 카카오 로그인에서 발급받은 REST API 키z
+        callbackURL: envValue.KAKAO_URL, // 카카오 로그인 Redirect URI 경로
       },
       // clientID에 카카오 앱 아이디 추가
       // callbackURL: 카카오 로그인 후 카카오가 결과를 전송해줄 URL

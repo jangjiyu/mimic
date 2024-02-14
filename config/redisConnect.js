@@ -1,7 +1,7 @@
-const dotenv = require("dotenv");
 const redis = require("redis");
+const envValue = require("./envConfig");
 
-const url = process.env.REDIS_URI;
+const url = envValue.REDIS_URI;
 
 const redisClient = redis.createClient({
   url,

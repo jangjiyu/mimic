@@ -1,8 +1,8 @@
 const { createLogger, format, transports } = require("winston");
 const winstonDaily = require("winston-daily-rotate-file");
-require("dotenv").config();
+const envValue = require("../config/envConfig");
 
-const logDir = process.env.LOGDIR;
+const logDir = envValue.LOGDIR;
 const colorizer = format.colorize();
 
 const logger = createLogger({
@@ -53,7 +53,7 @@ const stream = {
 // 콘솔에 표시
 logger.add(
   new transports.Console({
-    level: process.env.NODE_ENV === "production" ? "warn" : "info",
+    level: envValue.NODE_ENV === "production" ? "warn" : "info",
     format: format.combine(format.colorize(), format.simple()),
   })
 );

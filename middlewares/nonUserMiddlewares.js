@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const { User } = require("../models");
 const CustomError = require("../errors/customError");
+const envValue = require("../config/envConfig");
 
 module.exports = (req, res, next) => {
   try {
@@ -13,7 +14,7 @@ module.exports = (req, res, next) => {
 
       jwt.verify(
         authToken,
-        process.env.MYSECRET_KEY,
+        envValue.MYSECRET_KEY,
 
         async (error, decoded) => {
           try {

@@ -1,5 +1,6 @@
 const nodemailer = require("nodemailer");
 const { EmailAuth } = require("../models");
+const envValue = require("../config/envConfig");
 
 const sendEmail = (email) => {
   // 최대 6자리의 난수
@@ -7,17 +8,17 @@ const sendEmail = (email) => {
 
   // 인증번호 전송
   const configOptions = {
-    service: process.env.NODEMAILER_SERVICE,
-    host: process.env.NODEMAILER_HOST,
-    port: process.env.NODEMAILER_PORT,
+    service: envValue.NODEMAILER_SERVICE,
+    host: envValue.NODEMAILER_HOST,
+    port: envValue.NODEMAILER_PORT,
     maxConnections: 50,
     auth: {
-      user: process.env.NODEMAILER_USER,
-      pass: process.env.NODEMAILER_PASSWORD,
+      user: envValue.NODEMAILER_USER,
+      pass: envValue.NODEMAILER_PASSWORD,
     },
   };
   const emailForm = {
-    from: process.env.NODEMAILER_USER, // sender address
+    from: envValue.NODEMAILER_USER, // sender address
     to: email, // list of receivers
     subject: "MIMIC 이메일 인증",
     text: "MIMIC",
