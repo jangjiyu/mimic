@@ -41,6 +41,7 @@ module.exports = class Todo extends Sequelize.Model {
         paranoid: false,
         charset: "utf8mb4",
         collate: "utf8mb4_general_ci",
+        indexes: [{ fields: ["mbti"] }],
       }
     );
   }
