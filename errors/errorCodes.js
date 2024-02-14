@@ -33,4 +33,8 @@ module.exports = {
     statusCode: 503,
     message: "서비스를 사용할 수 없습니다.",
   },
+  ENV_VALIDATE_ERROR: {
+    statusCode: 404,
+    message: "환경변수 확인 필요.",
+  },
 };

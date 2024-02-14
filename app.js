@@ -9,10 +9,11 @@ const kakaoPassport = require("./passport/index");
 const { sequelize } = require("./models");
 const { errorHandler } = require("./middlewares/errorHandler");
 const { emailAuthTableSchedule, visitorCountSchedule } = require("./utils/setSchedule");
+const envValue = require("./config/envConfig");
 require("dotenv").config();
 
 const app = express();
-const port = process.env.PORT;
+const port = envValue.PORT;
 const corsOption = {
   origin: ["https://www.todaysmimic.today", "https://todaysmimic.today", "http://localhost:3000"],
   credentials: true,
