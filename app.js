@@ -13,7 +13,7 @@ const envValue = require("./config/envConfig");
 require("dotenv").config();
 
 const app = express();
-const port = envValue.PORT;
+const port = envValue.port;
 const corsOption = {
   origin: ["https://www.todaysmimic.today", "https://todaysmimic.today", "http://localhost:3000"],
   credentials: true,

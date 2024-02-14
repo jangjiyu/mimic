@@ -10,7 +10,7 @@ const createToken = (userData) => {
     profile: userData.profile,
   };
 
-  return jwt.sign(payload, envValue.MYSECRET_KEY, {
+  return jwt.sign(payload, envValue.secretKey, {
     expiresIn: "2d",
   });
 };

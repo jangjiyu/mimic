@@ -1,6 +1,6 @@
 const Sequelize = require("sequelize");
 const envValue = require("../config/envConfig");
-const env = envValue.NODE_ENV || "development";
+const env = envValue.nodeEnv;
 const config = require(__dirname + "/../config/dbConfig.js")[env];
 
 const User = require("./user");

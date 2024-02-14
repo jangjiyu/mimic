@@ -8,17 +8,17 @@ const sendEmail = (email) => {
 
   // 인증번호 전송
   const configOptions = {
-    service: envValue.NODEMAILER_SERVICE,
-    host: envValue.NODEMAILER_HOST,
-    port: envValue.NODEMAILER_PORT,
+    service: envValue.nodemailerService,
+    host: envValue.nodemailerHost,
+    port: envValue.nodemailerPort,
     maxConnections: 50,
     auth: {
-      user: envValue.NODEMAILER_USER,
-      pass: envValue.NODEMAILER_PASSWORD,
+      user: envValue.nodemailerUser,
+      pass: envValue.nodemailerPassword,
     },
   };
   const emailForm = {
-    from: envValue.NODEMAILER_USER, // sender address
+    from: envValue.nodemailerUser, // sender address
     to: email, // list of receivers
     subject: "MIMIC 이메일 인증",
     text: "MIMIC",

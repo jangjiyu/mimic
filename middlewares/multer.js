@@ -5,8 +5,8 @@ const { logger } = require("../utils/logger");
 const envValue = require("../config/envConfig");
 
 AWS.config.update({
-  accessKeyId: envValue.S3_ACCESS_KEY_ID,
-  secretAccessKey: envValue.S3_SECRET_ACCESS_KEY,
+  accessKeyId: envValue.s3KeyId,
+  secretAccessKey: envValue.s3SecretKey,
   region: "ap-northeast-2",
 });
 const s3 = new AWS.S3();
@@ -14,7 +14,7 @@ const s3 = new AWS.S3();
 const uploadProfile = multer({
   storage: multerS3({
     s3,
-    bucket: envValue.S3_BUCKET,
+    bucket: envValue.s3Bucket,
     key(req, file, cb) {
       // cb === callback
       const fileName = Math.floor(Math.random() * 100000000).toString();
@@ -34,7 +34,7 @@ const deleteProfile = async (url) => {
 
   await s3.deleteObject(
     {
-      Bucket: envValue.S3_BUCKET_FOLDER,
+      Bucket: envValue.s3BucketFolder,
       Key: filename,
     },
     function (err, data) {
@@ -43,7 +43,7 @@ const deleteProfile = async (url) => {
   );
   await s3.deleteObject(
     {
-      Bucket: envValue.S3_BUCKET_FOLDER2,
+      Bucket: envValue.s3BucketFolder,
       Key: filename,
     },
     function (err, data) {

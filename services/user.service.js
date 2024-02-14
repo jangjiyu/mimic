@@ -19,7 +19,7 @@ class UserService {
     if (password !== confirmPassword) throw new CustomError("BAD_REQUEST");
     if (!authResult) throw new CustomError("BAD_REQUEST");
 
-    const bcrPassword = bcrypt.hashSync(password, parseInt(parseInt(envValue.SALT)));
+    const bcrPassword = bcrypt.hashSync(password, parseInt(parseInt(envValue.salt)));
     const userData = await User.create({
       email,
       password: bcrPassword,
@@ -111,7 +111,7 @@ class UserService {
       if (!bcrCompareResult) throw new CustomError("UNAUTHORIZED");
       if (newPassword !== confirmPassword) throw new CustomError("BAD_REQUEST");
 
-      bcrPassword = bcrypt.hashSync(newPassword, parseInt(envValue.SALT));
+      bcrPassword = bcrypt.hashSync(newPassword, parseInt(envValue.salt));
     }
 
     await userData.update({

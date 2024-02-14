@@ -14,7 +14,7 @@ module.exports = (req, res, next) => {
 
       jwt.verify(
         authToken,
-        envValue.MYSECRET_KEY,
+        envValue.secretKey,
 
         async (error, decoded) => {
           try {

@@ -15,7 +15,7 @@ module.exports = (req, res, next) => {
     // 뒤쪽 'authToken'을 우리 MYSECRET_KEY를 가지고 인증해보고 에러 없으면, user 정보를 토근으로 다음 next으로 넘겨줌
     jwt.verify(
       authToken,
-      envValue.MYSECRET_KEY,
+      envValue.secretKey,
 
       async (error, decoded) => {
         try {
