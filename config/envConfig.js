@@ -1,6 +1,5 @@
 require("dotenv").config();
 const joi = require("joi");
-const CustomError = require("../errors/customError");
 
 const envSchema = joi
   .object({
@@ -38,6 +37,6 @@ const envSchema = joi
 
 const { value: envValue, error } = envSchema.validate(process.env);
 
-if (error) throw new CustomError("ENV_VALIDATE_ERROR");
+if (error) throw new Error(`[환경변수 확인 필요] ${error.message}`);
 
 module.exports = envValue;
